@@ -21,8 +21,8 @@
  
 // CONFIGURABLE GLOBAL STUFF -----------------------------------------------
 
-char ssid[] = "1412",     // WiFi network name
-     pass[] = "chacha12", // WiFi network password
+char ssid[] = "",     // WiFi network name
+     pass[] = "", // WiFi network password
      host[] = "gtbuses.herokuapp.com";
 
 #define POLL_INTERVAL 2 // Time between searches (minutes)
