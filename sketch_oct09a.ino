@@ -33,7 +33,7 @@ char ssid[] = "",     // WiFi network name
 
  
 
-WiFiClient client;
+WiFiClientSecure client;
 TinyXML    xml;
 uint8_t    buffer[150]; // For XML decoding
 
