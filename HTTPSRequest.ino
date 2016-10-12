@@ -15,8 +15,8 @@
 #include <WiFiClientSecure.h>
 #include <TinyXML.h>
 
-const char* ssid = "1412";
-const char* password = "chacha12";
+const char* ssid = "";
+const char* password = "";
 
 const char* host = "gtbuses.herokuapp.com";
 const int httpsPort = 443;
