@@ -1,0 +1,4 @@
+(fp_lib_table
+  (lib (name WS2812B)(type Eagle)(uri C:\Users\User\Downloads\WS2812B.lbr)(options "")(descr ""))
+  (lib (name ESP8266)(type KiCad)(uri C:\Users\User\Downloads\kicad-ESP8266-master\kicad-ESP8266-master\ESP8266.pretty)(options "")(descr ""))
+)
