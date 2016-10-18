@@ -28,10 +28,20 @@ const char* ssid = "";
 const char* password = "";
 
 const char* host = "gtbuses.herokuapp.com";
+
+const char* trolleyString = "/multiPredictions?stops=trolley|techsqua";
+const char* techString = "/multiPredictions?stops=tech|techsqua";
+const char* nightString = "/multiPredictions?stops=night|cloucomm";
+
 const int httpsPort = 443;
 
 TinyXML    xml;
 uint8_t    buffer[150]; // For XML decoding
+
+int serverDelay = 10;
+int myCount = 0;
+
+int myPredictions[10];
 
 // Use web browser to view and copy
      // Use WiFiClientSecure class to create TLS connection
@@ -60,45 +70,103 @@ void setup() {
   pixels.show();
   
   pixels.setBrightness(BRIGHTNESS);
+
+  parseServer(serverDelay);
 }
+
+uint8_t myCountdown = 0;
 
 void loop() {
 
-  Serial.print("connecting to ");
-  Serial.println(host);
-  if (!client.connect(host, httpsPort)) {
-    Serial.println("connection failed");
-    return;
-  }
- 
+  // get the estimates for the next bus and place them value in the myPredictions array
+  parseServer(serverDelay);
 
-  String url = "/multiPredictions?stops=night|cloucomm";
-  Serial.print("requesting URL: ");
-  Serial.println(url);
-  
-  client.print(String("GET ") + url + " HTTP/1.1\r\n" +
-               "Host: " + host + "\r\n" +
-               "User-Agent: trolleyStopClockESP8266\r\n" +
-               "Connection: close\r\n\r\n");
-               
-  Serial.println("request sent");
-  while (client.connected()) {
-    if (client.available() > 0) {
-      char c = client.read();
-      xml.processChar(c);
-      //Serial.print(c);
-    }
-  }
-  
- 
-  Serial.println("==========");
-  Serial.println("closing connection");
-  //client.stop();
+  //for the number of pixels we will set a color based on the estimated time of the next bus or trolley
+  for(uint8_t i=0; i<pixels.numPixels(); i++) {
 
-  
-  delay(100);
+       // as a default make the pixel dark
+       pixelColorRed = 0;
+       pixelColorBlue = 0; 
+       pixelColorGreen = 0;
+
+       // parse through the list of predictions to determine which pixels should be turned on
+       for(uint8_t j=0; j<10; j++) {
+       
+          if(60-myPredictions[0] < (60-1)){
+            myCountdown = 0;
+            if (myPredictions[j] != 0 && i >= (60-myPredictions[j])-2 && i <= (60-myPredictions[j]) + 2) {
+              pixelColorRed = 170;
+              pixelColorGreen = 100; 
+              pixelColorBlue = 0; 
+            }
+          }else{
+              if(i > myCountdown) {
+                pixelColorRed = 170;
+                pixelColorGreen = 100; 
+                pixelColorBlue = 0;
+              }else {
+                pixelColorRed = 0;
+                pixelColorGreen = 0; 
+                pixelColorBlue = 0;
+              }
+              if(myCountdown > 60){
+                myCountdown = 0;
+              }
+          }
+          
+      }
+     
+     
+       pixels.setPixelColor(i, pixels.Color(pixelColorRed, pixelColorGreen, pixelColorBlue)); 
+  }
+     myCountdown ++;
+     pixels.show();
+
+     delay(1000);
+     
 }
 
+
+void parseServer(int myDelay){
+  if(myCount < myDelay){
+      myCount += 1;
+  } else {
+     Serial.print("connecting to ");
+     Serial.println(host);
+     if (!client.connect(host, httpsPort)) {
+        Serial.println("connection failed");
+        return;
+     }
+ 
+
+    //String url = "/multiPredictions?stops=night|cloucomm";
+    Serial.print("requesting URL: ");
+    const char* url = trolleyString;
+    Serial.println(url);
+  
+    client.print(String("GET ") + url + " HTTP/1.1\r\n" +
+                "Host: " + host + "\r\n" +
+                "User-Agent: trolleyStopClockESP8266\r\n" +
+                "Connection: close\r\n\r\n");
+               
+    Serial.println("request sent");
+   while (client.connected()) {
+      if (client.available() > 0) {
+        char c = client.read();
+        xml.processChar(c);
+       //Serial.print(c);
+      }
+   }
+  
+ 
+    Serial.println("==========");
+    Serial.println("closing connection");
+    //client.stop();
+    myCount = 0;
+  }
+}
+
+/*
 void colorWipe(uint32_t c, uint8_t wait) {
       for(uint16_t i=0; i<pixels.numPixels(); i++) {
       pixels.setPixelColor(i, c);
@@ -106,59 +174,52 @@ void colorWipe(uint32_t c, uint8_t wait) {
       delay(wait);
       }
     }
-    
+*/
+int myNum = 0;
+
 void XML_callback( uint8_t statusflags, char* tagName,  uint16_t tagNameLen,  char* data,  uint16_t dataLen )
 {
-  int myPredictions[6];
+  /*
+  for (int i = 0; i<sizeof(myPredictions); i++) {
+    myPredictions[i] = 0;
+  }*/
 
-  int myNum = 0;
-  
-  if ((statusflags & STATUS_ATTR_TEXT) && !strcasecmp(tagName, "minutes")) {
-    uint32_t t = atoi(data); // Prediction in seconds (0 if gibberish)
-    myPredictions[myNum] = t;
-    Serial.print(t);
-    Serial.println(" minutes");
-
-    for(uint8_t i=0; i<pixels.numPixels(); i++) {
-     
-        if (i == 60-t) {
-          pixelColorRed = 150;
-          pixelColorGreen = 150; 
-          pixelColorBlue = 0; 
-        }
-        else {
-          pixelColorRed = 0;
-          pixelColorBlue = 0; 
-          pixelColorGreen = 0; 
-        }
-     
-        pixels.setPixelColor(i, pixels.Color(pixelColorRed, pixelColorGreen, pixelColorBlue));
-      }
-     pixels.show();
+  if ((statusflags & STATUS_ATTR_TEXT) && !strcasecmp(tagName, "copyright")) {
+    myNum = 0;
   }
+  if ((statusflags & STATUS_ATTR_TEXT) && !strcasecmp(tagName, "minutes")) {
+    int32_t t = atoi(data); // Prediction in seconds (0 if gibberish)
+    //Serial.println(t);
+    //Serial.println(tagName);
+    
+    myPredictions[myNum] = t;
+    String myTestString = String(myPredictions[myNum]);
+    Serial.println("here's stored value " + String(myNum) +" : " + myTestString);
+
+
+    
+    //Serial.print(t);
+    //Serial.println(" minutes");
+
+  }
+  if ((statusflags & STATUS_ATTR_TEXT) && !strcasecmp(tagName, "dirTag")) {
+    myNum++;
+    Serial.println(myNum);
+
+  }
+  
 
   if (statusflags & STATUS_START_TAG)
   {
     if ( tagNameLen )
     {
-      myNum += 1;
       //Serial.print("Start tag ");
       //Serial.println(tagName);
     }
   }
   else if  (statusflags & STATUS_END_TAG)
   {
-      myNum = 0;
-      for(int i= 0; i < sizeof(myPredictions); i++) {
-        if(myPredictions[i] > 1 && myPredictions[i] < 60) {
-          pixelColorRed = 150;
-          pixelColorGreen = 150;
-          pixelColorBlue = 20;
-          Serial.println(myPredictions[i]);
-          pixels.setPixelColor((60 - myPredictions[i]), pixels.Color(pixelColorRed, pixelColorGreen, pixelColorBlue));
-        }
-      }
-      
+
     //Serial.print("End tag ");
     //Serial.println(tagName);
   }
