@@ -11,7 +11,6 @@ Hardware:
 <li>Resistor x 1</li>
 <li>Capacitor x 1</li>
 <li>Push button x 1</li>
-<li>Switch button x 1</li>
 </ul>
 
 Software:
