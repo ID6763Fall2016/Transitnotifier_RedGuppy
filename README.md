@@ -20,7 +20,9 @@ Software:
 <li>TinyXML library</li>
 </ul>
 
-The working code resides in the NextBusGT folder. After connecting the hardwares together and connecting ESP8266 to your laptop, you need to modify the code with your wifi SSID and Password then upload the code to the ESP8266 and it will start retrieve the data from the xml provided by gtbuses.herokuapp.com.
+The working code resides in the NextBusGT folder. After connecting the hardwares together and connecting ESP8266 to your laptop, you need to modify the code with your wifi SSID and Password then upload the code to the ESP8266 and it will start retrieve the data from the xml provided by http://gtbuses.herokuapp.com.
+
+![alt tag](https://github.com/ID6763Fall2016/Transitnotifier_RedGuppy/blob/master/pcb.PNG)
 
 If you wish to make your own PCB instead of using a breadboard for the setup you can start with our CAD files in the WiFiNeoClock director.  We used KiCad to create the board.  Additional information on working with kiCad can be found at..
 http://kicad-pcb.org/
