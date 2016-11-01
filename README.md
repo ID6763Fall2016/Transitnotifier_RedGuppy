@@ -1,4 +1,5 @@
 # Transitnotifier_RedGuppy
+![alt tag](https://github.com/ID6763Fall2016/Transitnotifier_RedGuppy/blob/master/transitClock.jpg)
 
 This is the transit notifier project called Buzz Clock.
 You will need the following hardware and software to build the Buzz Clock: 
